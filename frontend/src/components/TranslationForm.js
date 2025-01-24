@@ -3,31 +3,20 @@ import {
   TextField, 
   Button, 
   Box, 
-  MenuItem, 
   CircularProgress, 
   Alert, 
   Snackbar,
   Paper,
-  Typography
+  Typography,
+  IconButton
 } from '@mui/material';
+import AddIcon from '@mui/icons-material/Add';
+import DeleteIcon from '@mui/icons-material/Delete';
 import { translateText } from '../services/api';
-
-const LANGUAGES = [
-  { code: 'es', name: 'Spanish' },
-  { code: 'fr', name: 'French' },
-  { code: 'de', name: 'German' },
-  { code: 'it', name: 'Italian' },
-  { code: 'pt', name: 'Portuguese' },
-  { code: 'ru', name: 'Russian' },
-  { code: 'zh', name: 'Chinese' },
-  { code: 'ja', name: 'Japanese' },
-  { code: 'ko', name: 'Korean' },
-  { code: 'ar', name: 'Arabic' }
-];
 
 function TranslationForm() {
   const [text, setText] = useState('');
-  const [targetLanguages, setTargetLanguages] = useState(['es']);
+  const [targetLanguages, setTargetLanguages] = useState(['']);
   const [translations, setTranslations] = useState({});
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
@@ -40,19 +29,47 @@ function TranslationForm() {
       return;
     }
 
+    // Filter out empty language inputs
+    const validLanguages = targetLanguages.filter(lang => lang.trim());
+    if (validLanguages.length === 0) {
+      setError('Please enter at least one target language');
+      return;
+    }
+
     setLoading(true);
     setError(null);
     
     try {
-      const response = await translateText(text, targetLanguages);
-      setTranslations(response.translations);
-      setSuccess(true);
+      const response = await translateText(text, validLanguages);
+      console.log('Translation response:', response);
+      if (response && response.translations) {
+        setTranslations(response.translations);
+        setSuccess(true);
+      } else {
+        throw new Error('Invalid response format');
+      }
     } catch (err) {
-      setError(err.message);
+      console.error('Translation error:', err);
+      setError(err.message || 'Translation failed. Please try again.');
       setTranslations({});
     } finally {
       setLoading(false);
     }
+  };
+
+  const addLanguageField = () => {
+    setTargetLanguages([...targetLanguages, '']);
+  };
+
+  const removeLanguageField = (index) => {
+    const newLanguages = targetLanguages.filter((_, i) => i !== index);
+    setTargetLanguages(newLanguages.length ? newLanguages : ['']);
+  };
+
+  const handleLanguageChange = (index, value) => {
+    const newLanguages = [...targetLanguages];
+    newLanguages[index] = value;
+    setTargetLanguages(newLanguages);
   };
 
   return (
@@ -75,22 +92,31 @@ function TranslationForm() {
           helperText={!text.trim() && error ? 'This field is required' : ''}
         />
         
-        <TextField
-          select
-          fullWidth
-          multiple
-          value={targetLanguages}
-          onChange={(e) => setTargetLanguages(e.target.value)}
-          label="Target Languages"
-          margin="normal"
-          disabled={loading}
-        >
-          {LANGUAGES.map((lang) => (
-            <MenuItem key={lang.code} value={lang.code}>
-              {lang.name}
-            </MenuItem>
-          ))}
-        </TextField>
+        {/* Language input fields */}
+        {targetLanguages.map((lang, index) => (
+          <Box key={index} sx={{ display: 'flex', gap: 1, alignItems: 'center', my: 1 }}>
+            <TextField
+              fullWidth
+              value={lang}
+              onChange={(e) => handleLanguageChange(index, e.target.value)}
+              label={`Target Language ${index + 1}`}
+              placeholder="Enter language (e.g., Spanish, French, German)"
+              disabled={loading}
+            />
+            <IconButton 
+              onClick={() => removeLanguageField(index)}
+              disabled={targetLanguages.length === 1}
+              color="error"
+            >
+              <DeleteIcon />
+            </IconButton>
+            {index === targetLanguages.length - 1 && (
+              <IconButton onClick={addLanguageField} color="primary">
+                <AddIcon />
+              </IconButton>
+            )}
+          </Box>
+        ))}
 
         <Button 
           variant="contained" 
@@ -102,14 +128,15 @@ function TranslationForm() {
           {loading ? <CircularProgress size={24} /> : 'Translate'}
         </Button>
 
+        {/* Translation Results */}
         {Object.entries(translations).map(([lang, translation]) => (
           <Paper key={lang} elevation={1} sx={{ mt: 2, p: 2 }}>
             <Typography variant="subtitle2" color="textSecondary" gutterBottom>
-              {LANGUAGES.find(l => l.code === lang)?.name}
+              Translation to {lang}
               {translation.source_language && ` (from ${translation.source_language})`}
             </Typography>
             <Typography>
-              {translation.text || translation.error}
+              {translation.text || translation.error || 'Translation not available'}
             </Typography>
           </Paper>
         ))}

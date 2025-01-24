@@ -1,11 +1,9 @@
-import os
 import logging
-from typing import Dict, Any
+import os
+from typing import Dict
 from langchain_openai import ChatOpenAI
 from langchain.prompts import ChatPromptTemplate
 from langchain.chains import LLMChain
-from langchain.memory import ConversationBufferMemory
-from langchain.schema import SystemMessage
 from langsmith import Client
 from app.core.config import settings
 
@@ -23,36 +21,24 @@ class TranslationService:
         try:
             logger.info("Initializing TranslationService...")
             
-            # Initialize LLM
-            self.llm = ChatOpenAI(
-                model="gpt-3.5-turbo",
-                temperature=0.1,
-                streaming=True
-            )
-            logger.info("LLM initialized successfully")
-            
             # Initialize LangSmith client
             self.langsmith_client = Client()
             logger.info("LangSmith client initialized")
             
-            # Initialize memory
-            self.memory = ConversationBufferMemory(
-                return_messages=True,
-                memory_key="chat_history"
+            self.llm = ChatOpenAI(
+                model="gpt-4",
+                temperature=0.1,
+                api_key=settings.OPENAI_API_KEY
             )
-            logger.info("Memory initialized")
-
-            # Enhanced translation prompt template
+            
+            # Translation prompt template
             self.translation_prompt = ChatPromptTemplate.from_messages([
-                ("system", """You are an expert translator with deep knowledge of multiple languages and cultures.
-                Follow these rules for translation:
-                1. Maintain the original meaning, tone, and style
-                2. Ensure natural and fluent output in the target language
-                3. Preserve any technical terms or proper nouns
-                4. Keep formatting and punctuation appropriate for the target language
-                5. If there are culturally specific terms, provide appropriate translations or explanations
-                
-                Target Language: {target_language}"""),
+                ("system", """You are an expert translator.
+                 If there are HTML markups, remove them. Give the outputs in a very simple format.
+                 If there is any math, keep the numbers and symbols unchanged.
+                 
+                 Translate the following text to {target_language}.
+                 Maintain the original meaning, tone, and style while ensuring natural and fluent output."""),
                 ("user", "{text}")
             ])
 
@@ -60,19 +46,38 @@ class TranslationService:
             self.translation_chain = LLMChain(
                 llm=self.llm,
                 prompt=self.translation_prompt,
-                memory=self.memory,
                 verbose=True
             )
-            logger.info("Translation chain created successfully")
+            logger.info("Translation service initialized successfully")
             
         except Exception as e:
             logger.error(f"Error initializing TranslationService: {str(e)}")
             raise
 
+    async def translate(self, text: str, target_language: str) -> str:
+        """Translate text to target language"""
+        try:
+            logger.info(f"Translating to {target_language}")
+            response = await self.translation_chain.ainvoke(
+                {
+                    "text": text,
+                    "target_language": target_language
+                },
+                config={
+                    "tags": [settings.LANGSMITH_PROJECT],
+                    "metadata": {
+                        "operation": "translation",
+                        "target_language": target_language
+                    }
+                }
+            )
+            return response["text"].strip()
+        except Exception as e:
+            logger.error(f"Translation failed: {str(e)}")
+            raise
+
     async def detect_language(self, text: str) -> str:
-        """
-        Detect the language of the input text
-        """
+        """Detect the language of the input text"""
         try:
             detect_prompt = ChatPromptTemplate.from_messages([
                 ("system", "Detect the language of the following text and respond with only the language name:"),
@@ -92,45 +97,8 @@ class TranslationService:
             logger.error(f"Error detecting language: {str(e)}")
             raise
 
-    async def translate(self, text: str, target_language: str) -> str:
-        """
-        Translate text to target language using LangChain
-        """
-        try:
-            # Detect source language
-            source_language = await self.detect_language(text)
-            logger.info(f"Detected source language: {source_language}")
-            
-            # Add source language info to memory
-            self.memory.chat_memory.add_message(
-                SystemMessage(content=f"Source language detected: {source_language}")
-            )
-            
-            # Execute the translation chain
-            response = await self.translation_chain.ainvoke(
-                {
-                    "text": text,
-                    "target_language": target_language
-                },
-                config={
-                    "tags": [settings.LANGSMITH_PROJECT],
-                    "metadata": {
-                        "operation": "translation",
-                        "source_language": source_language,
-                        "target_language": target_language
-                    }
-                }
-            )
-            
-            return response["text"].strip()
-        except Exception as e:
-            logger.error(f"Translation failed: {str(e)}")
-            raise
-
-    async def batch_translate(self, text: str, target_languages: list[str]) -> Dict[str, Any]:
-        """
-        Translate text to multiple target languages
-        """
+    async def batch_translate(self, text: str, target_languages: list[str]) -> Dict[str, Dict[str, str]]:
+        """Translate text to multiple target languages"""
         translations = {}
         try:
             source_language = await self.detect_language(text)
@@ -143,6 +111,7 @@ class TranslationService:
                         "text": translation,
                         "source_language": source_language
                     }
+                    logger.info(f"Successfully translated to {language}")
                 except Exception as e:
                     logger.error(f"Error translating to {language}: {str(e)}")
                     translations[language] = {

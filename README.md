@@ -68,12 +68,13 @@ source TranslatorEnv/bin/activate  # On Windows: TranslatorEnv\Scripts\activate
 
 3. Install backend dependencies:
 ```bash
-cd backend
+cd V1/backend
 pip install -r requirements.txt
 ```
 
 4. Create a `.env` file in the backend directory:
 ```env
+# V1/backend/.env
 OPENAI_API_KEY=your_openai_api_key
 LANGSMITH_API_KEY=your_langsmith_api_key  # Optional
 LANGSMITH_PROJECT=translator-ai  # Optional
@@ -83,12 +84,13 @@ LANGSMITH_PROJECT=translator-ai  # Optional
 
 1. Install frontend dependencies:
 ```bash
-cd frontend
+cd V1/frontend
 npm install
 ```
 
 2. Create a `.env` file in the frontend directory:
 ```env
+# V1/frontend/.env
 REACT_APP_API_URL=http://localhost:8000
 ```
 
@@ -96,13 +98,13 @@ REACT_APP_API_URL=http://localhost:8000
 
 1. Start the backend server:
 ```bash
-cd backend
+cd V1/backend
 uvicorn main:app --reload
 ```
 
 2. Start the frontend development server:
 ```bash
-cd frontend
+cd V1/frontend
 npm start
 ```
 

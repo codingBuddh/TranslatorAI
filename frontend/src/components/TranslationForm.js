@@ -1,74 +1,140 @@
 import React, { useState } from 'react';
-import { TextField, Button, Box, MenuItem } from '@mui/material';
+import { 
+  TextField, 
+  Button, 
+  Box, 
+  MenuItem, 
+  CircularProgress, 
+  Alert, 
+  Snackbar,
+  Paper,
+  Typography
+} from '@mui/material';
+import { translateText } from '../services/api';
 
 const LANGUAGES = [
   { code: 'es', name: 'Spanish' },
   { code: 'fr', name: 'French' },
   { code: 'de', name: 'German' },
   { code: 'it', name: 'Italian' },
-  // Add more languages as needed
+  { code: 'pt', name: 'Portuguese' },
+  { code: 'ru', name: 'Russian' },
+  { code: 'zh', name: 'Chinese' },
+  { code: 'ja', name: 'Japanese' },
+  { code: 'ko', name: 'Korean' },
+  { code: 'ar', name: 'Arabic' }
 ];
 
 function TranslationForm() {
   const [text, setText] = useState('');
-  const [targetLanguage, setTargetLanguage] = useState('es');
-  const [translation, setTranslation] = useState('');
+  const [targetLanguages, setTargetLanguages] = useState(['es']);
+  const [translations, setTranslations] = useState({});
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
+  const [success, setSuccess] = useState(false);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    // TODO: Implement API call
-    setTranslation('Translation will appear here...');
+    if (!text.trim()) {
+      setError('Please enter text to translate');
+      return;
+    }
+
+    setLoading(true);
+    setError(null);
+    
+    try {
+      const response = await translateText(text, targetLanguages);
+      setTranslations(response.translations);
+      setSuccess(true);
+    } catch (err) {
+      setError(err.message);
+      setTranslations({});
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
-    <Box component="form" onSubmit={handleSubmit} sx={{ maxWidth: 600, margin: '0 auto', p: 2 }}>
-      <TextField
-        fullWidth
-        multiline
-        rows={4}
-        value={text}
-        onChange={(e) => setText(e.target.value)}
-        label="Text to translate"
-        margin="normal"
-      />
+    <Paper elevation={3} sx={{ p: 3 }}>
+      <Typography variant="h5" gutterBottom>
+        Text Translation
+      </Typography>
       
-      <TextField
-        select
-        fullWidth
-        value={targetLanguage}
-        onChange={(e) => setTargetLanguage(e.target.value)}
-        label="Target Language"
-        margin="normal"
-      >
-        {LANGUAGES.map((lang) => (
-          <MenuItem key={lang.code} value={lang.code}>
-            {lang.name}
-          </MenuItem>
-        ))}
-      </TextField>
-
-      <Button 
-        variant="contained" 
-        type="submit"
-        sx={{ mt: 2 }}
-      >
-        Translate
-      </Button>
-
-      {translation && (
+      <Box component="form" onSubmit={handleSubmit} sx={{ mt: 2 }}>
         <TextField
           fullWidth
           multiline
           rows={4}
-          value={translation}
-          label="Translation"
+          value={text}
+          onChange={(e) => setText(e.target.value)}
+          label="Text to translate"
           margin="normal"
-          InputProps={{
-            readOnly: true,
-          }}
+          disabled={loading}
+          error={!text.trim() && error}
+          helperText={!text.trim() && error ? 'This field is required' : ''}
         />
-      )}
-    </Box>
+        
+        <TextField
+          select
+          fullWidth
+          multiple
+          value={targetLanguages}
+          onChange={(e) => setTargetLanguages(e.target.value)}
+          label="Target Languages"
+          margin="normal"
+          disabled={loading}
+        >
+          {LANGUAGES.map((lang) => (
+            <MenuItem key={lang.code} value={lang.code}>
+              {lang.name}
+            </MenuItem>
+          ))}
+        </TextField>
+
+        <Button 
+          variant="contained" 
+          type="submit"
+          disabled={loading || !text.trim()}
+          sx={{ mt: 2 }}
+          fullWidth
+        >
+          {loading ? <CircularProgress size={24} /> : 'Translate'}
+        </Button>
+
+        {Object.entries(translations).map(([lang, translation]) => (
+          <Paper key={lang} elevation={1} sx={{ mt: 2, p: 2 }}>
+            <Typography variant="subtitle2" color="textSecondary" gutterBottom>
+              {LANGUAGES.find(l => l.code === lang)?.name}
+              {translation.source_language && ` (from ${translation.source_language})`}
+            </Typography>
+            <Typography>
+              {translation.text || translation.error}
+            </Typography>
+          </Paper>
+        ))}
+
+        <Snackbar 
+          open={error !== null} 
+          autoHideDuration={6000} 
+          onClose={() => setError(null)}
+        >
+          <Alert severity="error" onClose={() => setError(null)}>
+            {error}
+          </Alert>
+        </Snackbar>
+
+        <Snackbar 
+          open={success} 
+          autoHideDuration={6000} 
+          onClose={() => setSuccess(false)}
+        >
+          <Alert severity="success" onClose={() => setSuccess(false)}>
+            Translation completed successfully!
+          </Alert>
+        </Snackbar>
+      </Box>
+    </Paper>
   );
 }
 

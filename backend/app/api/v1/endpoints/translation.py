@@ -1,8 +1,10 @@
 from fastapi import APIRouter, HTTPException
 from typing import List, Optional
 from pydantic import BaseModel
+from app.services.langchain_service import TranslationService
 
 router = APIRouter()
+translation_service = TranslationService()
 
 class TranslationRequest(BaseModel):
     text: str
@@ -15,8 +17,10 @@ class TranslationResponse(BaseModel):
 @router.post("/translate", response_model=TranslationResponse)
 async def translate_text(request: TranslationRequest):
     try:
-        # Placeholder for translation logic
-        translations = {lang: f"Translation to {lang}" for lang in request.target_languages}
+        translations = await translation_service.batch_translate(
+            text=request.text,
+            target_languages=request.target_languages
+        )
         return TranslationResponse(translations=translations)
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e)) 

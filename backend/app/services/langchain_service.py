@@ -26,8 +26,8 @@ class TranslationService:
             logger.info("LangSmith client initialized")
             
             self.llm = ChatOpenAI(
-                model="gpt-4",
-                temperature=0.1,
+                model="gpt-4o",
+                temperature=0.0,
                 api_key=settings.OPENAI_API_KEY
             )
             

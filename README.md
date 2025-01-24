@@ -1,6 +1,22 @@
 # TranslatorAI
 
-TranslatorAI is a modern web application that provides AI-powered translation services using GPT-4. It supports translation between multiple languages with a clean, user-friendly interface.
+TranslatorAI is a modern web application that provides AI-powered translation services using GPT-4o (optimized version). It supports translation between multiple languages with a clean, user-friendly interface and focuses on high-accuracy translations with zero temperature setting for consistent results.
+
+## Screenshots
+
+### V1.0.0 Multilanguage Interface
+![Main Interface](docs/images/v1_Multilanguage.png)
+*The main translation interface with text input and language selection*
+
+### Translation Example
+![Translation Example](docs/images/v1_example.png)
+*Example of translating text into Preffered languages*
+
+### Monitoring and Analytics
+![Monitoring and Analyses](docs/images/v1_langsmith.png)
+*Langsmith monitoring and analytics*
+
+
 
 ## Features
 
@@ -9,15 +25,17 @@ TranslatorAI is a modern web application that provides AI-powered translation se
 - Clean and responsive user interface
 - Real-time translation feedback
 - Support for HTML content cleaning
-- Preservation of mathematical expressions
+- Preservation of mathematical expressions and symbols
 - Translation quality monitoring via LangSmith
+- Zero-temperature translations for maximum accuracy
+- Optimized GPT-4 model for better performance
 
 ## Tech Stack
 
 ### Backend
 - FastAPI (Python web framework)
 - LangChain (AI/LLM framework)
-- OpenAI GPT-4
+- OpenAI GPT-4o (Optimized model)
 - LangSmith (for monitoring and analytics)
 
 ### Frontend
@@ -150,9 +168,11 @@ The application includes comprehensive error handling for:
 
 ## Limitations
 
-- Maximum text length is determined by GPT-4's token limit
-- Translation quality depends on GPT-4's capabilities
+- Maximum text length is determined by GPT-4o's token limit
+- Translation quality depends on GPT-4o's capabilities
 - Rate limiting based on OpenAI API limits
+- Zero temperature setting means less creative but more accurate translations
+- HTML markup is automatically removed for cleaner output
 
 ## Future Improvements
 

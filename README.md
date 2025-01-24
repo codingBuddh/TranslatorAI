@@ -5,15 +5,15 @@ TranslatorAI is a modern web application that provides AI-powered translation se
 ## Screenshots
 
 ### V1.0.0 Multilanguage Interface
-![Main Interface](docs/images/v1_Multilanguage.png)
+![Main Interface](V1/docs/images/v1_Multilanguage.png)
 *The main translation interface with text input and language selection*
 
 ### Translation Example
-![Translation Example](docs/images/v1_example.png)
+![Translation Example](V1/docs/images/v1_example.png)
 *Example of translating text into Preffered languages*
 
 ### Monitoring and Analytics
-![Monitoring and Analyses](docs/images/v1_langsmith.png)
+![Monitoring and Analyses](V1/docs/images/v1_langsmith.png)
 *Langsmith monitoring and analytics*
 
 

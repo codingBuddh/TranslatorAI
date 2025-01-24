@@ -1,44 +1,88 @@
 # Python
-__pycache__/
+**/__pycache__/
 *.py[cod]
 *$py.class
 *.so
 .Python
-env/
-build/
-develop-eggs/
-dist/
-downloads/
-eggs/
-.eggs/
-lib/
-lib64/
-parts/
-sdist/
-var/
-wheels/
-*.egg-info/
-.installed.cfg
-*.egg
-TranslatorEnv/
 
-# Environment variables
+# Virtual Environment
+V1/TranslatorEnv/
+V1/venv/
+V1/ENV/
+V1/.env/
+V1/.venv/
+.env.bak/
+.venv.bak/
+
+# Environment Variables
+V1/backend/.env
+V1/frontend/.env
 .env
 .env.local
+.env.development
+.env.test
+.env.production
 .env.*.local
+*.env
 
 # Node
-node_modules/
+V1/frontend/node_modules/
+V1/frontend/build/
+V1/frontend/coverage/
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
+.pnp.*
+.npm
+.yarn-integrity
 
-# IDEs
+# Build and Distribution
+V1/backend/build/
+V1/backend/dist/
+V1/frontend/build/
+V1/frontend/dist/
+*.egg-info/
+*.egg
+MANIFEST
+
+# IDEs and Editors
 .idea/
 .vscode/
 *.swp
 *.swo
+*.swn
+*.bak
+*.sublime*
 
-# OS
+# OS Generated Files
 .DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
 Thumbs.db
+Desktop.ini
+
+# Logs
+V1/logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pip-log.txt
+
+# Testing
+.coverage
+.tox/
+.pytest_cache/
+htmlcov/
+coverage/
+*.cover
+.hypothesis/
+
+# Project specific
+V1/backend/static/
+V1/backend/media/
+V1/docs/_build/
+TranslatorEnv

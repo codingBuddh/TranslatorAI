@@ -123,29 +123,7 @@ The application will be available at:
 ### POST /api/v1/translate
 Translates text to multiple languages.
 
-Request body:
-```json
-{
-  "text": "Hello world",
-  "target_languages": ["Spanish", "French"]
-}
-```
 
-Response:
-```json
-{
-  "translations": {
-    "Spanish": {
-      "text": "Hola mundo",
-      "source_language": "English"
-    },
-    "French": {
-      "text": "Bonjour le monde",
-      "source_language": "English"
-    }
-  }
-}
-```
 
 ## Monitoring and Analytics
 
@@ -166,21 +144,7 @@ The application includes comprehensive error handling for:
 - API failures
 - Network issues
 
-## Limitations
 
-- Maximum text length is determined by GPT-4o's token limit
-- Translation quality depends on GPT-4o's capabilities
-- Rate limiting based on OpenAI API limits
-- Zero temperature setting means less creative but more accurate translations
-- HTML markup is automatically removed for cleaner output
-
-## Future Improvements
-
-- Add support for file uploads
-- Implement translation memory
-- Add offline mode
-- Support for more specialized domains (legal, medical, etc.)
-- Batch processing for large texts
 
 ## Contributing
 
